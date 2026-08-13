@@ -1,22 +1,33 @@
-const path = require('node:path');
-const {exec} = require('node:child_process');
-const {lstat, readdir, readFile, writeFile, rm} = require('node:fs/promises');
+import path from 'node:path';
+import {exec} from 'node:child_process';
+import {lstat, readdir, readFile, writeFile, rm} from 'node:fs/promises';
+import {createRequire} from 'node:module';
 
-const {series, parallel, src, dest} = require('gulp');
-const postcss = require('gulp-postcss');
-const gulpif = require('gulp-if');
+import {series, parallel, src, dest} from 'gulp';
+import postcss from 'gulp-postcss';
+import gulpif from 'gulp-if';
+import jsonmin from 'gulp-jsonmin';
+import htmlmin from 'gulp-htmlmin';
+import imagemin from 'gulp-imagemin';
+import {optipng, svgo} from 'gulp-imagemin';
+import {ensureDir} from 'fs-extra/esm';
+import recursiveReadDir from 'recursive-readdir';
+import sharp from 'sharp';
+
+const require = createRequire(import.meta.url);
+const __dirname = import.meta.dirname;
+
 const jsonMerge = require('gulp-merge-json');
-const jsonmin = require('gulp-jsonmin');
-const htmlmin = require('gulp-htmlmin');
-const imagemin = require('gulp-imagemin');
-const {ensureDir} = require('fs-extra');
-const recursiveReadDir = require('recursive-readdir');
-const sharp = require('sharp');
+
+const {
+  default: {name: appName, version: appVersion}
+} = await import('./package.json', {with: {type: 'json'}});
 
 const targetEnv = process.env.TARGET_ENV || 'chrome';
 const isProduction = process.env.NODE_ENV === 'production';
 const enableContributions =
   (process.env.ENABLE_CONTRIBUTIONS || 'true') === 'true';
+const enableSponsors = (process.env.ENABLE_SPONSORS || 'true') === 'true';
 
 const mv3 = ['chrome', 'edge', 'opera', 'safari'].includes(targetEnv);
 
@@ -35,7 +46,7 @@ async function init() {
 
 function js(done) {
   exec(
-    `webpack-cli build --color --env mv3=${mv3}`,
+    `webpack-cli build --color --env appVersion=${appVersion} --env mv3=${mv3}`,
     function (err, stdout, stderr) {
       console.log(stdout);
       console.log(stderr);
@@ -47,7 +58,7 @@ function js(done) {
 function html() {
   const htmlSrc = ['src/**/*.html'];
 
-  if (mv3 && !['safari'].includes(targetEnv)) {
+  if (mv3 && !['firefox', 'safari'].includes(targetEnv)) {
     htmlSrc.push('!src/background/*.html');
   }
 
@@ -72,14 +83,14 @@ async function images(done) {
       .resize(size)
       .toFile(path.join(distDir, `src/assets/icons/app/icon-${size}.png`));
   }
-  // Chrome Web Store does not correctly display optimized icons
-  if (isProduction && targetEnv !== 'chrome') {
+
+  if (isProduction) {
     await new Promise(resolve => {
       src(path.join(distDir, 'src/assets/icons/app/*.png'), {
         base: '.',
         encoding: false
       })
-        .pipe(imagemin())
+        .pipe(imagemin([optipng()]))
         .pipe(dest('.'))
         .on('error', done)
         .on('finish', resolve);
@@ -105,7 +116,7 @@ async function images(done) {
           base: '.',
           encoding: false
         })
-          .pipe(imagemin())
+          .pipe(imagemin([optipng()]))
           .pipe(dest('.'))
           .on('error', done)
           .on('finish', resolve);
@@ -114,11 +125,16 @@ async function images(done) {
   }
 
   await new Promise(resolve => {
-    src('src/assets/icons/@(app|engines|misc)/*.@(png|svg)', {
+    let sources = 'app|engines|misc';
+    if (enableSponsors) {
+      sources += '|sponsors';
+    }
+
+    src(`src/assets/icons/@(${sources})/*.@(png|svg)`, {
       base: '.',
       encoding: false
     })
-      .pipe(gulpif(isProduction, imagemin()))
+      .pipe(gulpif(isProduction, imagemin([svgo()])))
       .pipe(dest(distDir))
       .on('error', done)
       .on('finish', resolve);
@@ -130,7 +146,7 @@ async function images(done) {
         'node_modules/vueton/components/contribute/assets/*.@(png|webp|svg)',
         {encoding: false}
       )
-        .pipe(gulpif(isProduction, imagemin()))
+        .pipe(gulpif(isProduction, imagemin([svgo()])))
         .pipe(dest(path.join(distDir, 'src/contribute/assets')))
         .on('error', done)
         .on('finish', resolve);
@@ -209,7 +225,7 @@ function manifest() {
       jsonMerge({
         fileName: 'manifest.json',
         edit: (parsedJson, file) => {
-          parsedJson.version = require('./package.json').version;
+          parsedJson.version = appVersion;
           return parsedJson;
         }
       })
@@ -247,7 +263,35 @@ See the LICENSE file for further information.
   }
 }
 
+function checkEnv(done) {
+  if (!['x64', 'ia32'].includes(process.arch)) {
+    done();
+
+    console.log(`
+The current CPU architecture (${process.arch}) is not supported.
+
+Please consult the provided build instructions, or follow the online guide.
+
+https://github.com/dessant/${appName}/wiki/Building-the-extension-on-Ubuntu
+https://github.com/dessant/${appName}/wiki/Building-the-extension-on-Windows
+`);
+
+    process.exit(1);
+  }
+}
+
+function build(done) {
+  checkEnv(done);
+
+  return series(
+    init,
+    parallel(js, html, images, fonts, locale, manifest, license)
+  )(done);
+}
+
 function zip(done) {
+  checkEnv(done);
+
   exec(
     `web-ext build -s dist/${targetEnv} -a artifacts/${targetEnv} -n "{name}-{version}-${targetEnv}.zip" --overwrite-dest`,
     function (err, stdout, stderr) {
@@ -259,6 +303,7 @@ function zip(done) {
 }
 
 function inspect(done) {
+  checkEnv(done);
   initEnv();
 
   exec(
@@ -266,6 +311,7 @@ function inspect(done) {
     webpack --profile --json > report.json && \
     webpack-bundle-analyzer --mode static report.json dist/chrome/src && \
     sleep 3 && rm report.{json,html}`,
+    {shell: '/bin/bash'},
     function (err, stdout, stderr) {
       console.log(stdout);
       console.log(stderr);
@@ -274,9 +320,4 @@ function inspect(done) {
   );
 }
 
-exports.build = series(
-  init,
-  parallel(js, html, images, fonts, locale, manifest, license)
-);
-exports.zip = zip;
-exports.inspect = inspect;
+export {build, zip, inspect};

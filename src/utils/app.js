@@ -27,7 +27,9 @@ import {
   rasterEngineIcons,
   engineIconAlias,
   engineIconVariants,
-  supportUrl
+  sponsorLogoVariants,
+  supportUrl,
+  sponsorSites
 } from 'utils/data';
 
 async function getEnabledEngines(options) {
@@ -145,7 +147,11 @@ async function hasModule({tabId, frameId = 0, module, insert = false} = {}) {
   return false;
 }
 
-async function insertBaseModule({activeTab = false} = {}) {
+async function insertBaseModule({
+  activeTab = false,
+  url = null,
+  allFrames = true
+} = {}) {
   const tabs = [];
   if (activeTab) {
     const tab = await getActiveTab();
@@ -155,7 +161,7 @@ async function insertBaseModule({activeTab = false} = {}) {
   } else {
     tabs.push(
       ...(await browser.tabs.query({
-        url: ['http://*/*', 'https://*/*'],
+        url: url || ['http://*/*', 'https://*/*'],
         windowType: 'normal'
       }))
     );
@@ -165,7 +171,7 @@ async function insertBaseModule({activeTab = false} = {}) {
     executeScript({
       files: ['/src/base/script.js'],
       tabId: tab.id,
-      allFrames: false
+      allFrames
     });
   }
 }
@@ -377,6 +383,14 @@ async function showSupportPage({getTab = false, activeTab = null} = {}) {
   return showPage({url: supportUrl, getTab, activeTab});
 }
 
+async function showSponsorPage({
+  name = '',
+  getTab = false,
+  activeTab = null
+} = {}) {
+  return showPage({url: getSponsorUrl(name), getTab, activeTab});
+}
+
 function getEngineIcon(engine, {variant = ''} = {}) {
   engine = engineIconAlias[engine] || engine;
 
@@ -529,6 +543,18 @@ function getEngineMenuIcon(engine, {variant = ''} = {}) {
       16: `src/assets/icons/engines/${name}.svg`
     };
   }
+}
+
+function getSponsorUrl(name) {
+  return sponsorSites[name];
+}
+
+function getSponsorLogo(name, {variant = ''} = {}) {
+  if (variant && sponsorLogoVariants[name]?.includes(variant)) {
+    name += `-${variant}`;
+  }
+
+  return `/src/assets/icons/sponsors/${name}.svg`;
 }
 
 function handleActionEscapeKey() {
@@ -743,6 +769,7 @@ export {
   showContributePage,
   showOptionsPage,
   showSupportPage,
+  showSponsorPage,
   setAppVersion,
   isSessionStartup,
   isStartup,
@@ -750,6 +777,8 @@ export {
   getNetRequestRuleIds,
   getEngineIcon,
   getEngineMenuIcon,
+  getSponsorUrl,
+  getSponsorLogo,
   handleActionEscapeKey,
   isContextMenuSupported,
   checkSearchEngineAccess,

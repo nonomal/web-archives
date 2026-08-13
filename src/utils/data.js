@@ -38,9 +38,6 @@ const engines = {
   archiveIsAll: {
     target: 'https://{host}/{url}'
   },
-  memento: {
-    target: 'http://timetravel.mementoweb.org/memento/{date}/{url}'
-  },
   megalodon: {
     target: 'https://megalodon.jp/?url={url}',
     isExec: true
@@ -71,6 +68,10 @@ const engineIconVariants = {
   archiveOrg: ['dark'],
   archiveIs: ['dark'],
   webcite: ['dark']
+};
+
+const sponsorLogoVariants = {
+  lenso: ['dark']
 };
 
 const rasterEngineIcons = ['ghostarchive'];
@@ -150,12 +151,18 @@ const linkArchiveUrlRx = {
 };
 
 const chromeDesktopUA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36';
 
 const chromeMobileUA =
-  'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+  'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Mobile Safari/537.36';
 
 const supportUrl = 'https://github.com/dessant/web-archives/issues';
+
+const sponsors = ['lenso'];
+
+const sponsorSites = {
+  lenso: 'https://go.vapps.dev/n2/sponsor/lenso'
+};
 
 export {
   optionKeys,
@@ -163,6 +170,7 @@ export {
   rasterEngineIcons,
   engineIconAlias,
   engineIconVariants,
+  sponsorLogoVariants,
   errorCodes,
   archiveOrgHosts,
   archiveIsHosts,
@@ -171,5 +179,7 @@ export {
   linkArchiveUrlRx,
   chromeDesktopUA,
   chromeMobileUA,
-  supportUrl
+  supportUrl,
+  sponsors,
+  sponsorSites
 };

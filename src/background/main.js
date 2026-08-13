@@ -33,6 +33,7 @@ import {
   isMobile,
   getActiveTab,
   getPlatform,
+  getBrowser,
   isValidTab,
   isIndexedDbSupported,
   runOnce
@@ -427,26 +428,14 @@ async function getTabUrl(session, search, doc, taskId) {
   }
 
   if (
-    ![
-      'archiveOrg',
-      'archiveOrgAll',
-      'archiveIs',
-      'archiveIsAll',
-      'memento'
-    ].includes(engine)
+    !['archiveOrg', 'archiveOrgAll', 'archiveIs', 'archiveIsAll'].includes(
+      engine
+    )
   ) {
     url = encodeURIComponent(url);
   }
 
-  if (engine === 'memento') {
-    const date = new Date();
-    date.setUTCMinutes(date.getUTCMinutes() - 1);
-
-    tabUrl = tabUrl.replace(
-      '{date}',
-      date.toISOString().split('.')[0].replace(/[-T:]/g, '')
-    );
-  } else if (engine === 'webcite') {
+  if (engine === 'webcite') {
     tabUrl = tabUrl.replace('{date}', new Date().toISOString().split('T')[0]);
   } else if (['archiveOrg', 'archiveOrgAll'].includes(engine)) {
     const host = archiveOrgHosts[session.options.archiveOrgHost];
@@ -459,8 +448,6 @@ async function getTabUrl(session, search, doc, taskId) {
       tabUrl = tabUrl.replace(/^https/i, 'http');
     }
   }
-
-  archiveOrgHosts, archiveIsHosts;
 
   tabUrl = tabUrl.replace(/{url}/g, url);
 
@@ -980,6 +967,8 @@ async function processMessage(request, sender) {
     });
   } else if (request.id === 'getPlatform') {
     return getPlatform();
+  } else if (request.id === 'getBrowser') {
+    return getBrowser();
   } else if (request.id === 'storageRequest') {
     const data = await registry.getStorageItem({
       storageId: request.storageId,
@@ -1161,7 +1150,7 @@ async function setup({event = ''} = {}) {
       if (['samsung'].includes(targetEnv) && !startup.setupInstance) {
         // Samsung Internet: Content script does not always run in restored
         // active tab on startup.
-        await insertBaseModule({activeTab: true});
+        await insertBaseModule({activeTab: true, allFrames: false});
       }
 
       await setupUI();

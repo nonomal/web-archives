@@ -24,11 +24,6 @@
     "description": "Name of the search engine."
   },
 
-  "engineName_memento": {
-    "message": "Memento",
-    "description": "Name of the search engine."
-  },
-
   "engineName_archiveIs": {
     "message": "Archive.is",
     "description": "Name of the search engine."
@@ -97,11 +92,6 @@
 
   "menuItemTitle_archiveOrgAll": {
     "message": "Wayback Machine (all)",
-    "description": "Title of the menu item."
-  },
-
-  "menuItemTitle_memento": {
-    "message": "Memento",
     "description": "Title of the menu item."
   },
 
@@ -188,11 +178,6 @@
 
   "optionTitle_archiveOrgAll": {
     "message": "Wayback Machine (all)",
-    "description": "Title of the option."
-  },
-
-  "optionTitle_memento": {
-    "message": "Memento Time Travel",
     "description": "Title of the option."
   },
 
@@ -449,6 +434,11 @@
   "optionValue_archiveIsHost_onion_1": {
     "message": "Onion service",
     "description": "Value of the option."
+  },
+
+  "optionSectionTitle_sponsors": {
+    "message": "Sponsors",
+    "description": "Title of the options section."
   },
 
   "inputPlaceholder_docUrl": {

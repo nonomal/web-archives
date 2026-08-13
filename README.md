@@ -3,7 +3,7 @@
 
 <p align="center">
   </br></br>
-  <a href="https://chrome.google.com/webstore/detail/web-archives/hkligngkgcpcolhcnkgccglchdafcnao">
+  <a href="https://chromewebstore.google.com/detail/web-archives/hkligngkgcpcolhcnkgccglchdafcnao">
     <picture>
       <source srcset="https://i.imgur.com/XBIE9pk.png" media="(prefers-color-scheme: dark)">
       <img height="58" src="https://i.imgur.com/oGxig2F.png" alt="Chrome Web Store"></picture></a>
@@ -29,14 +29,33 @@
   </br></br>
 </p>
 
+<h2 align="center">Sponsors</h2>
+
+</br>
+<div align="center">
+  <a href="https://go.vapps.dev/n1/sponsor/lenso">
+    <div>
+      <picture>
+        <source srcset="https://i.imgur.com/YBkomfb.png" media="(prefers-color-scheme: dark)">
+        <img height="58" src="https://i.imgur.com/60KdpH7.png" alt="Lenso.ai"></picture>
+      <div>
+        </br>
+        <sup>Lenso.ai - Explore billions of images from all around the web.</br>
+          Search for places, people, duplicates, and more.</sup>
+      </div>
+    </div>
+  </a>
+</div>
+</br>
+
 ## Supporting the Project
 
 Web Archives is an open source project made possible thanks to a community
 of awesome supporters. If you'd like to support the continued development
 of the extension, please consider contributing with
-[Patreon](https://armin.dev/go/patreon?pr=web-archives&src=repo),
-[PayPal](https://armin.dev/go/paypal?pr=web-archives&src=repo) or
-[Bitcoin](https://armin.dev/go/bitcoin?pr=web-archives&src=repo).
+[Patreon](https://go.vapps.dev/patreon?pr=web-archives&src=repo),
+[PayPal](https://go.vapps.dev/paypal?pr=web-archives&src=repo) or
+[Bitcoin](https://go.vapps.dev/bitcoin?pr=web-archives&src=repo).
 
 ## Description
 
@@ -64,7 +83,7 @@ https://github.com/dessant/web-archives/wiki/Search-engines
 
 ## License
 
-Copyright (c) 2017-2025 Armin Sebastian
+Copyright (c) 2017-2026 Armin Sebastian
 
 This software is released under the terms of the GNU General Public License v3.0.
 See the [LICENSE](LICENSE) file for further information.
